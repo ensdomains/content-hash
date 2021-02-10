@@ -18,7 +18,7 @@
   "author": "pldespaigne",
   "license": "ISC",
   "dependencies": {
-    "cids": "^0.8.3",
+    "cids": "^1.1.5",
     "multicodec": "^2.1.0",
     "multihashes": "^2.0.0"
   },

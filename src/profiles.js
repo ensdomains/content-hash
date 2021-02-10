@@ -45,7 +45,7 @@ const encodes = {
   */
   skynet: (value) => {
     const multihash = multiH.encode(hexStringToBuffer(value), 'keccak-256');
-    return new CID(1, 'skynet-ns', multihash).buffer;
+    return new CID(1, 'skynet-ns', multihash).bytes;
   },
   /**
   * @param {string} value
@@ -53,14 +53,14 @@ const encodes = {
   */
   swarm: (value) => {
     const multihash = multiH.encode(hexStringToBuffer(value), 'keccak-256');
-		return new CID(1, 'swarm-manifest', multihash).buffer;
+		return new CID(1, 'swarm-manifest', multihash).bytes;
   },
   /**
   * @param {string} value
   * @return {Buffer}
   */
   ipfs: (value) => {
-    return new CID(value).toV1().buffer;
+    return new CID(value).toV1().bytes;
   },
   /**
   * @param {string} value
@@ -69,7 +69,7 @@ const encodes = {
   ipns: (value) => {
     // represent libp2p-key as a CID
     // https://github.com/libp2p/specs/blob/master/RFC/0001-text-peerid-cid.md
-    return new CID(1, 'libp2p-key', new CID(value).multihash).buffer
+    return new CID(1, 'libp2p-key', new CID(value).multihash).bytes
   },
   /**
   * @param {string} value

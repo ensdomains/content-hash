@@ -17,6 +17,7 @@
 */
 
 const multiC = require('multicodec');
+const multiH = require('multihashes');
 
 const { hexStringToBuffer, profiles } = require('./profiles');
 const { cidForWeb, cidV0ToV1Base32 } = require('./helpers');
@@ -79,7 +80,7 @@ module.exports = {
 		let profile = profiles[codec];
 		if (!profile) profile = profiles['default'];
 		const encodedValue = profile.encode(value);
-		return multiC.addPrefix(codec, encodedValue).toString('hex');
+		return multiH.toHexString(multiC.addPrefix(codec, encodedValue))
 	},
 
 	/**
