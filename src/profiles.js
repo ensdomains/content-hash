@@ -18,6 +18,7 @@
 
 const CID = require('cids');
 const multiH = require('multihashes');
+const base64 = require('base64-js');
 
 /**
  * Convert an hexadecimal string to a Buffer, the string can start with or without '0x'
@@ -44,8 +45,9 @@ const encodes = {
   * @return {Buffer}
   */
   skynet: (value) => {
-    const multihash = multiH.encode(hexStringToBuffer(value), 'keccak-256');
-    return new CID(1, 'skynet-ns', multihash).bytes;
+    return base64.toByteArray(
+      value.padEnd(value.length + 4 - (value.length % 4), "=")
+    );
   },
   /**
   * @param {string} value
@@ -106,6 +108,9 @@ const decodes = {
   utf8: (value) => {
     return value.toString('utf8');
   },
+  base64: (value) => {
+    return base64.fromByteArray(value).replace(/\//g,'_').replace(/=/g,'')
+  }
 };
 
 /**
@@ -116,7 +121,7 @@ const decodes = {
 const profiles = {
   'skynet-ns': {
     encode: encodes.skynet,
-    decode: decodes.hexMultiHash,
+    decode: decodes.base64,
   },
   'swarm-ns': {
     encode: encodes.swarm,
