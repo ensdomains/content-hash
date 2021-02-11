@@ -7,7 +7,7 @@ const ipfs_CIDv0 = 'QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4'
 const ipfs_CIDv1 = 'bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4'
 const ipfs_contentHash = 'e3010170122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f'
 const ipns_CIDv1 = 'k2k4r8kgnix5x0snul9112xdpqgiwc5xmvi8ja0szfhntep2d7qv8zz3'
-const ipns_CIDv0_contentHash = 'e5010172122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f'
+const ipns_peerID_B58_contentHash = 'e5010172122029f2d17be6139079dc48696d1f582a8530eb9805b561eda517e22a892c7e3f1f'
 const ipns_peerID_B58 = '12D3KooWG4NvqQVczTrWY1H2tvsJmbQf5bbA3xGYXC4FM3wWCfE4'
 const ipns_libp2pKey_CIDv1 = 'k51qzi5uqu5dihst24f3rp2ej4co9berxohfkxaenbq1wjty7nrd5e9xp4afx1'
 const ipns_ED25519_contentHash = 'e50101720024080112205cbd1cc86ac20d6640795809c2a185bb2504538a2de8076da5a6971b8acb4715'
@@ -96,7 +96,7 @@ describe('content-hash', () => {
 		it('should encode legacy PeerID (RSA B58)', () => {
 			// RSA ones lookes like regular multihashes
 			const actual = contentHash.encode('ipns-ns', ipfs_CIDv0);
-			actual.should.be.equal(ipns_CIDv0_contentHash);
+			actual.should.be.equal(ipns_peerID_B58_contentHash);
 		});
 		it('should encode ED25519 PeerID (B58)', () => {
 			// ED25519 are allowed to be encoded in Base58 for backward-interop
@@ -109,18 +109,30 @@ describe('content-hash', () => {
 			const actual = contentHash.encode('ipns-ns', ipns_libp2pKey_CIDv1);
 			actual.should.be.equal(ipns_ED25519_contentHash);
 		});
+		it('should refuse to encode non-libp2p-key value inlined as identity multihash', () => {
+			expect(() => contentHash.encode('ipns-ns', '12uA8M8Ku8mHUumxHcu7uee')).to.throw('ipns-ns allows only valid cryptographic libp2p-key identifiers, try using ED25519 pubkey instead')
+		});
 		it('should getCodec', () => {
 			const actual = contentHash.getCodec(ipns_ED25519_contentHash);
 			actual.should.be.equal('ipns-ns');
 		});
 		it('should decode legacy PeerID to CIDv1 with libp2p-key codec', () => {
-			const actual = contentHash.decode(ipns_CIDv0_contentHash);
+			const actual = contentHash.decode(ipns_peerID_B58_contentHash);
 			actual.should.be.equal(ipns_CIDv1);
 		});
 		it('should decode ED25519 to CIDv1 with libp2p-key codec', () => {
 			const actual = contentHash.decode(ipns_ED25519_contentHash);
 			actual.should.be.equal(ipns_libp2pKey_CIDv1);
 		});
+    it('should decode deprecated DNSLink identifiers', () => {
+        // DNSLink is fine to be used before ENS resolve occurs, but should be avoided after
+        // Context: https://github.com/ensdomains/ens-app/issues/849#issuecomment-777088950
+        // For now, we allow decoding of legacy values:
+        const deprecated_dnslink_contentHash = 'e5010170000f6170702e756e69737761702e6f7267'
+        const deprecated_dnslink_value = 'app.uniswap.org'
+        const actual = contentHash.decode(deprecated_dnslink_contentHash)
+        actual.should.be.equal(deprecated_dnslink_value)
+    });
 	});
 	describe('onion', () => {
 		it('should encode', () => {
