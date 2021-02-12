@@ -20,7 +20,7 @@ const onion3_contentHash = 'bd037035336c663537716f7679757677736336786e7270707970
 const ipfsBase32DagPb = 'bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4';
 const ipfsBase32Libp2pKey = 'bafzbeie5745rpv2m6tjyuugywy4d5ewrqgqqhfnf445he3omzpjbx5xqxe';
 const skylink = 'CABAB_1Dt0FJsxqsu_J4TodNCbCGvtFf1Uys_3EgzOlTcg'
-const skylink_contentHash = '90b2c60508004007fd43b74149b31aacbbf2784e874d09b086bed15fd54cacff7120cce95372'
+const skylink_contentHash = 'b1991008004007fd43b74149b31aacbbf2784e874d09b086bed15fd54cacff7120cce95372'
 
 describe('content-hash (legacy tests)', () =>
 	{

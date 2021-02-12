@@ -15,6 +15,7 @@ Here you can find a [live demo](https://content-hash.surge.sh/) of this package.
 - `swarm-ns`
 - `ipfs-ns`
 - `ipns-ns`
+- `skynet-ns`
 - Every other codec supported by [multicodec](https://github.com/multiformats/multicodec) will be encoded by default in `utf-8`.
 > You can see the full list of codec supported [here](https://github.com/multiformats/multicodec/blob/master/table.csv)
 
