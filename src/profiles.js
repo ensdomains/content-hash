@@ -34,6 +34,33 @@ const hexStringToBuffer = (hex) => {
 }
 
 /**
+ * Validates IPNS identifier  to safeguard against insecure names.
+ * @param {CID} name ised in ipns-ns
+ * @return {bool}
+ */
+const isCryptographicIPNS =  (cid) => {
+  try {
+    const { multihash } = cid
+    // Additional check for identifiers shorter
+    // than what inlined ED25519 pubkey would be
+    // https://github.com/ensdomains/ens-app/issues/849#issuecomment-777088950
+    if (multihash.length < 38) {
+      const mh = multiH.decode(multihash)
+      // ED25519 pubkeys are inlined using identity hash function
+      // and we should not see anything shorter than that
+      if (mh.name === 'identity' && mh.length < 36) {
+        // One can read inlined string value via:
+        // console.log('ipns-ns id:', String(multiH.decode(new CID(value).multihash).digest))
+        return false
+      }
+    }
+    // ok, CID looks fine
+    return true
+  } catch (_) { return false }
+  return false
+}
+
+/**
 * list of known encoding,
 * encoding should be a function that takes a `string` input,
 * and return a `Buffer` result
@@ -59,25 +86,13 @@ const encodes = {
   * @return {Buffer}
   */
   ipns: (value) => {
-    const { multihash } = new CID(value)
-
-    // Additional check for identifiers shorter
-    // than what inlined ED25519 pubkey would be
-    // https://github.com/ensdomains/ens-app/issues/849#issuecomment-777088950
-    if (multihash.length < 38) {
-      const mh = multiH.decode(multihash)
-      // ED25519 pubkeys are inlined using identity hash function
-      // and we should not see anything shorter than that
-      if (mh.name === 'identity' && mh.length < 36) {
-        // One can read inlined string value via:
-        // console.log('ipns-ns id:', String(multiH.decode(new CID(value).multihash).digest))
+    const cid = new CID(value)
+    if (!isCryptographicIPNS(cid)) {
         throw Error('ipns-ns allows only valid cryptographic libp2p-key identifiers, try using ED25519 pubkey instead')
-      }
     }
-
-    // represent libp2p-key as a CID
+    // Represent IPNS name as a CID with libp2p-key codec
     // https://github.com/libp2p/specs/blob/master/RFC/0001-text-peerid-cid.md
-    return new CID(1, 'libp2p-key', multihash).buffer
+    return new CID(1, 'libp2p-key', cid.multihash).buffer
   },
   /**
   * @param {string} value
@@ -112,26 +127,14 @@ const decodes = {
   * @param {Buffer} value 
   */
   ipns: (value) => {
-    const cid = new CID(value).toV1();
-
-    // Additional check for identifiers shorter
-    // than what inlined ED25519 pubkey would be
-    // https://github.com/ensdomains/ens-app/issues/849#issuecomment-777088950
-    if (cid.multihash.length < 38) {
-      const mh = multiH.decode(cid.multihash)
-      // ED25519 pubkeys are inlined using identity hash function
-      // and we should not see anything shorter than that
-      if (mh.name === 'identity' && mh.length < 36) {
+    const cid = new CID(value).toV1()
+    if (!isCryptographicIPNS(cid)) {
         // Value is not a libp2p-key, return original string
         console.warn('[ensdomains/content-hash] use of non-cryptographic identifiers in ipns-ns is deprecated and will be removed, migrate to ED25519 libp2p-key')
         return String(multiH.decode(new CID(value).multihash).digest)
         // TODO: start throwing an error (after some deprecation period)
         // throw Error('ipns-ns allows only valid cryptographic libp2p-key identifiers, try using ED25519 pubkey instead')
-        // One can read inlined string value via:
-        // console.log('ipns-ns id:', String(multiH.decode(new CID(value).multihash).digest))
-      }
     }
-
     return cid.toString('base36')
   },
   /**
