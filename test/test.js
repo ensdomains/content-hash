@@ -19,6 +19,8 @@ const onion3 = 'p53lf57qovyuvwsc6xnrppyply3vtqm7l6pcobkmyqsiofyeznfu5uqd';
 const onion3_contentHash = 'bd037035336c663537716f7679757677736336786e72707079706c79337674716d376c3670636f626b6d797173696f6679657a6e667535757164';
 const ipfsBase32DagPb = 'bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4';
 const ipfsBase32Libp2pKey = 'bafzbeie5745rpv2m6tjyuugywy4d5ewrqgqqhfnf445he3omzpjbx5xqxe';
+const deprecated_dnslink_contentHash = 'e5010170000f6170702e756e69737761702e6f7267'
+const deprecated_dnslink_value = 'app.uniswap.org'
 
 describe('content-hash (legacy tests)', () =>
 	{
@@ -124,15 +126,17 @@ describe('content-hash', () => {
 			const actual = contentHash.decode(ipns_ED25519_contentHash);
 			actual.should.be.equal(ipns_libp2pKey_CIDv1);
 		});
-    it('should decode deprecated DNSLink identifiers', () => {
-        // DNSLink is fine to be used before ENS resolve occurs, but should be avoided after
-        // Context: https://github.com/ensdomains/ens-app/issues/849#issuecomment-777088950
-        // For now, we allow decoding of legacy values:
-        const deprecated_dnslink_contentHash = 'e5010170000f6170702e756e69737761702e6f7267'
-        const deprecated_dnslink_value = 'app.uniswap.org'
-        const actual = contentHash.decode(deprecated_dnslink_contentHash)
-        actual.should.be.equal(deprecated_dnslink_value)
-    });
+		it('should decode deprecated DNSLink identifiers', () => {
+			// DNSLink is fine to be used before ENS resolve occurs, but should be avoided after
+			// Context: https://github.com/ensdomains/ens-app/issues/849#issuecomment-777088950
+			// For now, we allow decoding of legacy values:
+			const actual = contentHash.decode(deprecated_dnslink_contentHash)
+			actual.should.be.equal(deprecated_dnslink_value)
+		});
+		it('should get codec of deprecated DNSLink identifiers', () => {
+			const actual = contentHash.getCodec(deprecated_dnslink_contentHash);
+			actual.should.be.equal('ipns-ns');
+		});
 	});
 	describe('onion', () => {
 		it('should encode', () => {
