@@ -19,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "cids": "^1.1.5",
+    "js-base64": "^3.6.0",
     "multicodec": "^2.1.0",
     "multihashes": "^2.0.0"
   },

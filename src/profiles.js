@@ -18,7 +18,7 @@
 
 const CID = require('cids');
 const multiH = require('multihashes');
-const base64 = require('base64-js');
+const base64 = require('js-base64')
 
 /**
  * Convert an hexadecimal string to a Buffer, the string can start with or without '0x'
@@ -45,9 +45,7 @@ const encodes = {
   * @return {Buffer}
   */
   skynet: (value) => {
-    return base64.toByteArray(
-      value.padEnd(value.length + 4 - (value.length % 4), "=")
-    );
+    return base64.toUint8Array(value)
   },
   /**
   * @param {string} value
@@ -109,7 +107,8 @@ const decodes = {
     return value.toString('utf8');
   },
   base64: (value) => {
-    return base64.fromByteArray(value).replace(/\//g,'_').replace(/=/g,'')
+    // `true` option makes it URL safe (replaces / and + with - and _ )
+    return base64.fromUint8Array(value, true)
   }
 };
 
