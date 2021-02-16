@@ -6388,6 +6388,33 @@ const hexStringToBuffer = (hex) => {
 }
 
 /**
+ * Validates IPNS identifier  to safeguard against insecure names.
+ * @param {CID} name ised in ipns-ns
+ * @return {bool}
+ */
+const isCryptographicIPNS =  (cid) => {
+  try {
+    const { multihash } = cid
+    // Additional check for identifiers shorter
+    // than what inlined ED25519 pubkey would be
+    // https://github.com/ensdomains/ens-app/issues/849#issuecomment-777088950
+    if (multihash.length < 38) {
+      const mh = multiH.decode(multihash)
+      // ED25519 pubkeys are inlined using identity hash function
+      // and we should not see anything shorter than that
+      if (mh.name === 'identity' && mh.length < 36) {
+        // One can read inlined string value via:
+        // console.log('ipns-ns id:', String(multiH.decode(new CID(value).multihash).digest))
+        return false
+      }
+    }
+    // ok, CID looks fine
+    return true
+  } catch (_) { return false }
+  return false
+}
+
+/**
 * list of known encoding,
 * encoding should be a function that takes a `string` input,
 * and return a `Buffer` result
@@ -6429,6 +6456,19 @@ const encodes = {
   * @param {string} value
   * @return {Buffer}
   */
+  ipns: (value) => {
+    const cid = new CID(value)
+    if (!isCryptographicIPNS(cid)) {
+        throw Error('ipns-ns allows only valid cryptographic libp2p-key identifiers, try using ED25519 pubkey instead')
+    }
+    // Represent IPNS name as a CID with libp2p-key codec
+    // https://github.com/libp2p/specs/blob/master/RFC/0001-text-peerid-cid.md
+    return new CID(1, 'libp2p-key', cid.multihash).buffer
+  },
+  /**
+  * @param {string} value
+  * @return {Buffer}
+  */
   utf8: (value) => {
     return Buffer.from(value, 'utf8');
   },
@@ -6450,9 +6490,23 @@ const decodes = {
   /**
   * @param {Buffer} value 
   */
-  cid: (value) => {
+  ipfs: (value) => {
     const cid = new CID(value).toV1();
     return cid.toString(cid.codec === 'libp2p-key' ? 'base36' : 'base32')
+  },
+  /**
+  * @param {Buffer} value 
+  */
+  ipns: (value) => {
+    const cid = new CID(value).toV1()
+    if (!isCryptographicIPNS(cid)) {
+        // Value is not a libp2p-key, return original string
+        console.warn('[ensdomains/content-hash] use of non-cryptographic identifiers in ipns-ns is deprecated and will be removed, migrate to ED25519 libp2p-key')
+        return String(multiH.decode(new CID(value).multihash).digest)
+        // TODO: start throwing an error (after some deprecation period)
+        // throw Error('ipns-ns allows only valid cryptographic libp2p-key identifiers, try using ED25519 pubkey instead')
+    }
+    return cid.toString('base36')
   },
   /**
   * @param {Buffer} value 
@@ -6478,11 +6532,11 @@ const profiles = {
   },
   'ipfs-ns': {
     encode: encodes.ipfs,
-    decode: decodes.cid,
+    decode: decodes.ipfs,
   },
   'ipns-ns': {
     encode: encodes.ipns,
-    decode: decodes.cid,
+    decode: decodes.ipns,
   },
   'default': {
     encode: encodes.utf8,
