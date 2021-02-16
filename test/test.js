@@ -126,15 +126,15 @@ describe('content-hash', () => {
 			const actual = contentHash.decode(ipns_ED25519_contentHash);
 			actual.should.be.equal(ipns_libp2pKey_CIDv1);
 		});
-    it('should decode deprecated DNSLink identifiers', () => {
-        // DNSLink is fine to be used before ENS resolve occurs, but should be avoided after
-        // Context: https://github.com/ensdomains/ens-app/issues/849#issuecomment-777088950
-        // For now, we allow decoding of legacy values:
-        const deprecated_dnslink_contentHash = 'e5010170000f6170702e756e69737761702e6f7267'
-        const deprecated_dnslink_value = 'app.uniswap.org'
-        const actual = contentHash.decode(deprecated_dnslink_contentHash)
-        actual.should.be.equal(deprecated_dnslink_value)
-    });
+		it('should decode deprecated DNSLink identifiers', () => {
+			// DNSLink is fine to be used before ENS resolve occurs, but should be avoided after
+			// Context: https://github.com/ensdomains/ens-app/issues/849#issuecomment-777088950
+			// For now, we allow decoding of legacy values:
+			const deprecated_dnslink_contentHash = 'e5010170000f6170702e756e69737761702e6f7267'
+			const deprecated_dnslink_value = 'app.uniswap.org'
+			const actual = contentHash.decode(deprecated_dnslink_contentHash)
+			actual.should.be.equal(deprecated_dnslink_value)
+		});
 	});
 	describe('onion', () => {
 		it('should encode', () => {
