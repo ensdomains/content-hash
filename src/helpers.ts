@@ -1,6 +1,5 @@
-import { base32 } from "multiformats/bases/base32";
-import { base36 } from "multiformats/bases/base36";
-import { CID } from "multiformats/cid";
+import { CID } from "./utils/cid.js";
+import { base32, base36 } from "./utils/coders.js";
 
 // Label's max length in DNS (https://tools.ietf.org/html/rfc1034#page-7)
 const dnsLabelMaxLength = 63;
