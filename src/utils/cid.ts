@@ -1,6 +1,7 @@
 import type { ByteView, MultihashDigest } from "../types.js";
 import {
   base32,
+  base36,
   base58btc,
   type MultibaseDecoder,
   type MultibaseEncoder,
@@ -344,9 +345,12 @@ export class CID<
   >(
     bytes: ByteView<Link<Data, Code, Alg, TVersion>>
   ): CID<Data, Code, Alg, TVersion> {
-    const [cid, remainder] = CID.decodeFirst(bytes);
+    let [cid, remainder] = CID.decodeFirst(bytes);
     if (remainder.length !== 0) {
-      throw new Error("Incorrect length");
+      [cid, remainder] = CID.decodeFirst(
+        Uint8Array.from([0, DAG_PB_CODE, ...bytes])
+      );
+      if (remainder.length !== 0) throw new Error("Incorrect length");
     }
     return cid as CID<Data, Code, Alg, TVersion>;
   }
@@ -456,10 +460,6 @@ export class CID<
 
     const cid = CID.decode(bytes);
 
-    if (cid.version === 0 && source[0] !== "Q") {
-      throw Error("Version 0 CID string must not include multibase prefix");
-    }
-
     // Cache string representation to avoid computing it on `this.toString()`
     baseCache(cid).set(prefix, source);
 
@@ -494,13 +494,13 @@ function parseCIDtoBytes<
       const decoder = base ?? base32;
       return [base32.prefix as Prefix, decoder.decode(source)];
     }
+    case base36.prefix: {
+      const decoder = base ?? base36;
+      return [base36.prefix as Prefix, decoder.decode(source)];
+    }
     default: {
-      if (base == null) {
-        throw Error(
-          "To parse non base32 or base58btc encoded CID multibase decoder must be provided"
-        );
-      }
-      return [source[0] as Prefix, base.decode(source)];
+      source = `z${source}`;
+      return [source[0] as Prefix, base58btc.decode(source)];
     }
   }
 }

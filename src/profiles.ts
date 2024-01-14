@@ -3,7 +3,7 @@ import {
   encodeArAddress,
 } from "@ensdomains/address-encoder/coders";
 import { CID } from "./utils/cid.js";
-import { base32, base36, base58btc } from "./utils/coders.js";
+import { base32, base36 } from "./utils/coders.js";
 import { createDigest, decodeDigest } from "./utils/digest.js";
 
 type Bytes = Uint8Array;
@@ -88,19 +88,7 @@ const encodes = {
     return CID.parse(value).toV1().bytes;
   },
   ipns: (value: string): Bytes => {
-    let cid: CID;
-    try {
-      cid = CID.parse(value, value.startsWith("k") ? base36 : undefined);
-    } catch (e) {
-      // legacy v0 decode
-      const bytes = base58btc.decode(`z${value}`);
-      cid = new CID(0, 0x72, createDigest(0x00, bytes.slice(2)), bytes);
-    }
-    if (!isCryptographicIPNS(cid)) {
-      throw Error(
-        "ipns-ns allows only valid cryptographic libp2p-key identifiers, try using ED25519 pubkey instead"
-      );
-    }
+    const cid = CID.parse(value);
     // Represent IPNS name as a CID with libp2p-key codec
     // https://github.com/libp2p/specs/blob/master/RFC/0001-text-peerid-cid.md
     return CID.create(1, 0x72, cid.multihash).bytes;

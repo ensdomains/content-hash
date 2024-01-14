@@ -2,6 +2,8 @@ import { describe, expect, test } from "vitest";
 
 import { decode, encode, getCodec } from "./index.js";
 
+const invalidate = (v: string) => `${v}aaaaaaa`;
+
 const ipfs_CIDv0 = "QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4";
 const ipfs_CIDv1 =
   "bafybeibj6lixxzqtsb45ysdjnupvqkufgdvzqbnvmhw2kf7cfkesy7r7d4";
@@ -117,19 +119,39 @@ describe("content-hash", () => {
     test("ipfs - CIDv0", () => {
       expect(encode("ipfs", ipfs_CIDv0)).toEqual(ipfs_contentHash);
     });
+    test("ipfs - CIDv0 - invalid", () => {
+      expect(() =>
+        encode("ipfs", invalidate(ipfs_CIDv0))
+      ).toThrowErrorMatchingInlineSnapshot('"Invalid CID version 36"');
+    });
     test("ipfs - CIDv1", () => {
       expect(encode("ipfs", ipfs_CIDv1)).toEqual(ipfs_contentHash);
+    });
+    test("ipfs - CIDv1 - invalid", () => {
+      expect(() =>
+        encode("ipfs", invalidate(ipfs_CIDv1))
+      ).toThrowErrorMatchingInlineSnapshot('"Excess padding"');
     });
     describe("ipns", () => {
       test("legacy PeerID (RSA B58)", () => {
         // RSA ones lookes like regular multihashes
         expect(encode("ipns", ipfs_CIDv0)).toEqual(ipns_peerID_B58_contentHash);
       });
+      test("legacy PeerID (RSA B58) - invalid", () => {
+        expect(() =>
+          encode("ipns", invalidate(ipfs_CIDv0))
+        ).toThrowErrorMatchingInlineSnapshot('"Invalid CID version 36"');
+      });
       test("ED25519 (B58)", () => {
         // ED25519 are allowed to be encoded in Base58 for backward-interop
         expect(encode("ipns", ipns_peerID_B58)).toEqual(
           ipns_ED25519_contentHash
         );
+      });
+      test("ED25519 (B58) - invalid", () => {
+        expect(() =>
+          encode("ipns", invalidate(ipns_peerID_B58))
+        ).toThrowErrorMatchingInlineSnapshot('"Incorrect length"');
       });
       test("PeerID (CIDv1)", () => {
         // libp2p-key as CID is the current canonical notation:
@@ -138,10 +160,15 @@ describe("content-hash", () => {
           ipns_ED25519_contentHash
         );
       });
+      test("PeerID (CIDv1) - invalid", () => {
+        expect(() =>
+          encode("ipns", invalidate(ipns_libp2pKey_CIDv1))
+        ).toThrowErrorMatchingInlineSnapshot('"Invalid CID version 26"');
+      });
       test("error on non-libp2p-key value", () => {
-        expect(() => encode("ipns", "12uA8M8Ku8mHUumxHcu7uee")).throws(
-          "ipns-ns allows only valid cryptographic libp2p-key identifiers, try using ED25519 pubkey instead"
-        );
+        expect(() =>
+          encode("ipns", "12uA8M8Ku8mHUumxHcu7uee")
+        ).toThrowErrorMatchingInlineSnapshot('"Incorrect length"');
       });
     });
     test("onion", () => {

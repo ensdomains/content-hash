@@ -2,14 +2,7 @@ import {
   decodeArAddress,
   encodeArAddress,
 } from "@ensdomains/address-encoder/coders";
-import {
-  base32Decode,
-  base32Encode,
-  base58DecodeNoCheck,
-  base58EncodeNoCheck,
-  createBase32Options,
-} from "@ensdomains/address-encoder/utils";
-import { utils } from "@scure/base";
+import { base58, utils } from "@scure/base";
 
 export type Multibase<Prefix extends string> = string | `${Prefix}${string}`;
 
@@ -73,20 +66,21 @@ const createMultibaseCoder = <Prefix extends string>({
 export const base58btc = createMultibaseCoder({
   name: "base58btc",
   prefix: "z",
-  encode: base58EncodeNoCheck,
-  decode: base58DecodeNoCheck,
+  encode: base58.encode,
+  decode: base58.decode,
 });
 
-const base32Options = createBase32Options({
-  alphabet: "abcdefghijklmnopqrstuvwxyz234567",
-  padded: false,
-});
+const customBase32 = utils.chain(
+  utils.radix2(5),
+  utils.alphabet("abcdefghijklmnopqrstuvwxyz234567"),
+  utils.join("")
+);
 
 export const base32 = createMultibaseCoder({
   name: "base32",
   prefix: "b",
-  encode: (bytes: Uint8Array) => base32Encode(bytes, base32Options),
-  decode: (multibase: Multibase<"b">) => base32Decode(multibase, base32Options),
+  encode: (bytes: Uint8Array) => customBase32.encode(bytes),
+  decode: (multibase: Multibase<"b">) => customBase32.decode(multibase),
 });
 
 const base36Chain = utils.chain(
