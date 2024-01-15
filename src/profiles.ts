@@ -1,12 +1,10 @@
-import { base32 } from "multiformats/bases/base32";
-import { base36 } from "multiformats/bases/base36";
-import { base58btc } from "multiformats/bases/base58";
-import { base64url } from "multiformats/bases/base64";
-import { CID } from "multiformats/cid";
 import {
-  create as createDigest,
-  decode as multihashDecode,
-} from "multiformats/hashes/digest";
+  decodeArAddress,
+  encodeArAddress,
+} from "@ensdomains/address-encoder/coders";
+import { CID } from "./utils/cid.js";
+import { base32, base36 } from "./utils/coders.js";
+import { createDigest, decodeDigest } from "./utils/digest.js";
 
 type Bytes = Uint8Array;
 
@@ -54,7 +52,7 @@ const isCryptographicIPNS = (cid: CID): boolean => {
     // than what inlined ED25519 pubkey would be
     // https://github.com/ensdomains/ens-app/issues/849#issuecomment-777088950
     if (multihash.size < 38) {
-      const mh = multihashDecode(multihash.bytes);
+      const mh = decodeDigest(multihash.bytes);
       // ED25519 pubkeys are inlined using identity hash function
       // and we should not see anything shorter than that
       if (mh.code === 0x0 && mh.size < 36) {
@@ -70,7 +68,7 @@ const isCryptographicIPNS = (cid: CID): boolean => {
   }
 };
 
-const base64Decode = (value: string): Bytes => base64url.decode(`u${value}`);
+const base64Decode = (value: string): Bytes => decodeArAddress(value);
 
 /**
  * list of known encoding,
@@ -90,19 +88,7 @@ const encodes = {
     return CID.parse(value).toV1().bytes;
   },
   ipns: (value: string): Bytes => {
-    let cid: CID;
-    try {
-      cid = CID.parse(value, value.startsWith("k") ? base36 : undefined);
-    } catch (e) {
-      // legacy v0 decode
-      const bytes = base58btc.decode(`z${value}`);
-      cid = new CID(0, 0x72, createDigest(0x00, bytes.slice(2)), bytes);
-    }
-    if (!isCryptographicIPNS(cid)) {
-      throw Error(
-        "ipns-ns allows only valid cryptographic libp2p-key identifiers, try using ED25519 pubkey instead"
-      );
-    }
+    const cid = CID.parse(value);
     // Represent IPNS name as a CID with libp2p-key codec
     // https://github.com/libp2p/specs/blob/master/RFC/0001-text-peerid-cid.md
     return CID.create(1, 0x72, cid.multihash).bytes;
@@ -124,7 +110,7 @@ const encodes = {
 const decodes = {
   hexMultiHash: (value: Bytes): string => {
     const cid = CID.decode(value);
-    return bytesToHexString(multihashDecode(cid.multihash.bytes).digest);
+    return bytesToHexString(decodeDigest(cid.multihash.bytes).digest);
   },
   ipfs: (value: Bytes): string => {
     const cid = CID.decode(value).toV1();
@@ -148,7 +134,7 @@ const decodes = {
     return decoder.decode(value);
   },
   base64: (value: Bytes): string => {
-    return base64url.encode(value).substring(1);
+    return encodeArAddress(value);
   },
 };
 

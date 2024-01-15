@@ -1,6 +1,6 @@
 {
   "name": "@ensdomains/content-hash",
-  "version": "3.0.0-beta.5",
+  "version": "3.1.0-rc.1",
   "description": "A simple tool to encode/decode content hash for EIP 1577 compliant ENS Resolvers (fork of pldespaigne/content-hash)",
   "type": "module",
   "main": "./dist/cjs/index.js",
@@ -50,8 +50,9 @@
     "url": "https://github.com/ensdomains/content-hash"
   },
   "dependencies": {
-    "@multiformats/sha3": "^2.0.17",
-    "multiformats": "^12.0.1"
+    "@ensdomains/address-encoder": "1.0.0-rc.3",
+    "@noble/curves": "^1.2.0",
+    "@scure/base": "^1.1.5"
   },
   "devDependencies": {
     "typescript": "^5.1.6",

@@ -1,4 +1,3 @@
-import { varint } from "multiformats";
 import { concatUint8Arrays } from "./helpers.js";
 import { codeToName, nameToCode, type Codec, type CodecId } from "./map.js";
 import {
@@ -7,6 +6,11 @@ import {
   profiles,
   type Profile,
 } from "./profiles.js";
+import {
+  decodeVarint,
+  encodeVarint,
+  varintEncodingLength,
+} from "./utils/varint.js";
 
 export { type Codec, type CodecId } from "./map.js";
 
@@ -19,7 +23,7 @@ export { cidForWeb, cidV0ToV1Base32 } from "./helpers.js";
  */
 export const decode = (contentHash: string): string => {
   const bytes = hexStringToBytes(contentHash);
-  const [code, offset] = varint.decode(bytes);
+  const [code, offset] = decodeVarint(bytes);
   const value = bytes.slice(offset);
   const name = codeToName[code as CodecId];
   let profile = profiles[name as keyof typeof profiles] as Profile | undefined;
@@ -37,9 +41,9 @@ export const encode = (name: Codec, value: string): string => {
   if (!profile) profile = profiles["default"];
   const bytes = profile.encode(value);
   const code = nameToCode[name] as number;
-  const codeBytes = varint.encodeTo(
+  const codeBytes = encodeVarint(
     code,
-    new Uint8Array(varint.encodingLength(code))
+    new Uint8Array(varintEncodingLength(code))
   );
   return bytesToHexString(concatUint8Arrays(codeBytes, bytes));
 };
@@ -51,6 +55,6 @@ export const encode = (name: Codec, value: string): string => {
  */
 export const getCodec = (contentHash: string): Codec | undefined => {
   const bytes = hexStringToBytes(contentHash);
-  const [code] = varint.decode(bytes);
+  const [code] = decodeVarint(bytes);
   return codeToName[code as CodecId];
 };
