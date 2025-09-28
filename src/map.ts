@@ -6,6 +6,7 @@ export const codeToName = {
   0x01bd: "onion3",
   0xb19910: "skynet",
   0xb29910: "arweave",
+  0xb59910: "walrus",
 } as const;
 
 export const nameToCode = {
@@ -16,6 +17,7 @@ export const nameToCode = {
   onion3: 0x01bd,
   skynet: 0xb19910,
   arweave: 0xb29910,
+  walrus: 0xb59910,
 } as const;
 
 export type CodecId = keyof typeof codeToName;

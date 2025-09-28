@@ -14,6 +14,7 @@
 - `onion3`
 - `skynet`
 - `arweave`
+- `walrus`
 
 ## 📥 Install
 
