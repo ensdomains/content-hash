@@ -30,6 +30,10 @@ const skylink_contentHash =
 const arweave = "ys32Pt8uC7TrVxHdOLByOspfPEq2LO63wREHQIM9SJQ";
 const arweave_contentHash =
   "90b2ca05cacdf63edf2e0bb4eb5711dd38b0723aca5f3c4ab62ceeb7c1110740833d4894";
+const adnl =
+  "61bd855da6c07e8d1c807e880c2a9a6272011cfc2b34b2e9de32cd37ff6f4ae5";
+const adnl_contentHash =
+  "90b2da0561bd855da6c07e8d1c807e880c2a9a6272011cfc2b34b2e9de32cd37ff6f4ae5";
 describe("content-hash (legacy tests)", () => {
   describe("decode", () => {
     test("ipfs", () => {
@@ -109,6 +113,9 @@ describe("content-hash", () => {
     test("arweave", () => {
       expect(decode(arweave_contentHash)).toEqual(arweave);
     });
+    test("adnl", () => {
+      expect(decode(adnl_contentHash)).toEqual(adnl);
+    });
   });
   describe("encode", () => {
     test("swarm", () => {
@@ -156,6 +163,14 @@ describe("content-hash", () => {
     test("arweave", () => {
       expect(encode("arweave", arweave)).toEqual(arweave_contentHash);
     });
+    test("adnl", () => {
+      expect(encode("adnl", adnl)).toEqual(adnl_contentHash);
+    });
+    test("adnl - error on wrong length", () => {
+      expect(() => encode("adnl", "deadbeef")).throws(
+        "ADNL address must be 32 bytes, got 4"
+      );
+    });
   });
   describe("getCodec", () => {
     test("swarm", () => {
@@ -178,6 +193,9 @@ describe("content-hash", () => {
     });
     test("arweave", () => {
       expect(getCodec(arweave_contentHash)).toEqual("arweave");
+    });
+    test("adnl", () => {
+      expect(getCodec(adnl_contentHash)).toEqual("adnl");
     });
   });
 });
