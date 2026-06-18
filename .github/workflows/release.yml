@@ -23,4 +23,8 @@ jobs:
         run: pnpm install
       - name: Build
         run: pnpm build
-      - run: pnpm publish --provenance
+      # npm >= 11.5.1 is required for OIDC trusted publishing (token exchange).
+      # Node 22 ships with npm 10.x, which 404s on the publish PUT.
+      - name: Update npm
+        run: npm install -g npm@latest
+      - run: npm publish --provenance --access public
