@@ -114,6 +114,13 @@ const encodes = {
   arweave: (value: string): Bytes => {
     return base64Decode(value);
   },
+  adnl: (value: string): Bytes => {
+    const bytes = hexStringToBytes(value);
+    if (bytes.length !== 32) {
+      throw new Error(`ADNL address must be 32 bytes, got ${bytes.length}`);
+    }
+    return bytes;
+  },
 };
 
 /**
@@ -182,6 +189,15 @@ export const profiles = {
   arweave: {
     encode: encodes.arweave,
     decode: decodes.base64,
+  },
+  adnl: {
+    encode: encodes.adnl,
+    decode: (value: Bytes): string => {
+      if (value.length !== 32) {
+        throw new Error(`ADNL address must be 32 bytes, got ${value.length}`);
+      }
+      return bytesToHexString(value);
+    },
   },
   default: {
     encode: encodes.utf8,
