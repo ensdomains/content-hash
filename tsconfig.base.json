@@ -24,16 +24,15 @@
     "checkJs": false,
 
     // Interop constraints
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": false,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
     "importHelpers": true, // This is only used for build validation. Since we do not have `tslib` installed, this will fail if we accidentally make use of anything that'd require injection of helpers.
 
     // Language and environment
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Bundler",
     "module": "ESNext",
-    "target": "ES2021", // Setting this to `ES2021` enables native support for `Node v16+`: https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping.
+    "target": "ES2022",
 
     // Skip type checking for node modules
     "skipLibCheck": true
