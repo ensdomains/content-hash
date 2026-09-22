@@ -121,6 +121,18 @@ const encodes = {
     }
     return bytes;
   },
+  "ton-storage": (value: string): Bytes => {
+    const normalized = value.startsWith("0x") ? value.slice(2) : value;
+    if (normalized.length !== 64) {
+      throw new Error(
+        `TON Storage BagID must be 64 hexadecimal characters, got ${normalized.length}`
+      );
+    }
+    if (!/^[0-9a-fA-F]{64}$/.test(normalized)) {
+      throw new Error("TON Storage BagID must be hexadecimal");
+    }
+    return hexStringToBytes(normalized);
+  },
 };
 
 /**
@@ -195,6 +207,17 @@ export const profiles = {
     decode: (value: Bytes): string => {
       if (value.length !== 32) {
         throw new Error(`ADNL address must be 32 bytes, got ${value.length}`);
+      }
+      return bytesToHexString(value);
+    },
+  },
+  "ton-storage": {
+    encode: encodes["ton-storage"],
+    decode: (value: Bytes): string => {
+      if (value.length !== 32) {
+        throw new Error(
+          `TON Storage BagID must be 32 bytes, got ${value.length}`
+        );
       }
       return bytesToHexString(value);
     },

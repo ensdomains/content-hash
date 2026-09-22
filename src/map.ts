@@ -7,6 +7,7 @@ export const codeToName = {
   0xb19910: "skynet",
   0xb29910: "arweave",
   0xb69910: "adnl",
+  0xb79910: "ton-storage",
 } as const;
 
 export const nameToCode = {
@@ -18,6 +19,7 @@ export const nameToCode = {
   skynet: 0xb19910,
   arweave: 0xb29910,
   adnl: 0xb69910,
+  "ton-storage": 0xb79910,
 } as const;
 
 export type CodecId = keyof typeof codeToName;

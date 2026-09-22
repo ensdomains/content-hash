@@ -34,6 +34,14 @@ const adnl =
   "61bd855da6c07e8d1c807e880c2a9a6272011cfc2b34b2e9de32cd37ff6f4ae5";
 const adnl_contentHash =
   "90b2da0561bd855da6c07e8d1c807e880c2a9a6272011cfc2b34b2e9de32cd37ff6f4ae5";
+const tonStorage =
+  "ffeeddccbbaa00998877665544332211ffeeddccbbaa00998877665544332211";
+const tonStorage_contentHash =
+  "90b2de05ffeeddccbbaa00998877665544332211ffeeddccbbaa00998877665544332211";
+const tonStorageLeadingZero =
+  "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
+const tonStorageLeadingZero_contentHash =
+  "90b2de0500112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
 describe("content-hash (legacy tests)", () => {
   describe("decode", () => {
     test("ipfs", () => {
@@ -116,6 +124,19 @@ describe("content-hash", () => {
     test("adnl", () => {
       expect(decode(adnl_contentHash)).toEqual(adnl);
     });
+    test("ton-storage", () => {
+      expect(decode(tonStorage_contentHash)).toEqual(tonStorage);
+    });
+    test("ton-storage - preserves leading zero bytes", () => {
+      expect(decode(tonStorageLeadingZero_contentHash)).toEqual(
+        tonStorageLeadingZero
+      );
+    });
+    test("ton-storage - error on wrong payload length", () => {
+      expect(() => decode("90b2de05deadbeef")).throws(
+        "TON Storage BagID must be 32 bytes, got 4"
+      );
+    });
   });
   describe("encode", () => {
     test("swarm", () => {
@@ -171,6 +192,31 @@ describe("content-hash", () => {
         "ADNL address must be 32 bytes, got 4"
       );
     });
+    test("ton-storage", () => {
+      expect(encode("ton-storage", tonStorage)).toEqual(
+        tonStorage_contentHash
+      );
+    });
+    test("ton-storage - normalizes uppercase", () => {
+      expect(encode("ton-storage", tonStorage.toUpperCase())).toEqual(
+        tonStorage_contentHash
+      );
+    });
+    test("ton-storage - preserves leading zero bytes", () => {
+      expect(encode("ton-storage", tonStorageLeadingZero)).toEqual(
+        tonStorageLeadingZero_contentHash
+      );
+    });
+    test("ton-storage - error on wrong length", () => {
+      expect(() => encode("ton-storage", "deadbeef")).throws(
+        "TON Storage BagID must be 64 hexadecimal characters, got 8"
+      );
+    });
+    test("ton-storage - error on non-hexadecimal input", () => {
+      expect(() => encode("ton-storage", "g".repeat(64))).throws(
+        "TON Storage BagID must be hexadecimal"
+      );
+    });
   });
   describe("getCodec", () => {
     test("swarm", () => {
@@ -196,6 +242,15 @@ describe("content-hash", () => {
     });
     test("adnl", () => {
       expect(getCodec(adnl_contentHash)).toEqual("adnl");
+    });
+    test("ton-storage", () => {
+      expect(getCodec(tonStorage_contentHash)).toEqual("ton-storage");
+    });
+    test("distinguishes ADNL and TON Storage with the same payload", () => {
+      expect(getCodec(encode("adnl", tonStorage))).toEqual("adnl");
+      expect(getCodec(encode("ton-storage", tonStorage))).toEqual(
+        "ton-storage"
+      );
     });
   });
 });
