@@ -15,6 +15,7 @@
 - `skynet`
 - `arweave`
 - `adnl`
+- `ton-storage` (`tonstorage://<BagID>`)
 
 ## 📥 Install
 
