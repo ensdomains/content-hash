@@ -3,12 +3,12 @@
   "version": "3.2.0",
   "description": "A simple tool to encode/decode content hash for EIP 1577 compliant ENS Resolvers (fork of pldespaigne/content-hash)",
   "type": "module",
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/index.d.ts",
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "default": "./dist/esm/index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -20,9 +20,7 @@
   "scripts": {
     "test": "vitest",
     "clean": "rm -rf ./dist",
-    "build:esm": "tsc --project tsconfig.build.json --module es2022 --outDir ./dist/esm && echo > ./dist/esm/package.json '{\"type\":\"module\",\"sideEffects\":false}'",
-    "build:types": "tsc --project tsconfig.build.json --module esnext --declarationDir ./dist/types --emitDeclarationOnly --declaration --declarationMap",
-    "build": "pnpm run clean && pnpm run build:esm && pnpm run build:types",
+    "build": "pnpm run clean && tsc -p tsconfig.build.json",
     "prepublish": "pnpm run build"
   },
   "keywords": [
